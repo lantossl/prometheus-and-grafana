@@ -1,0 +1,41 @@
+version: "3.7"
+services:
+  prometheus:
+    image: prom/prometheus
+    deploy:
+      replicas: 2
+    #container_name: prometheus
+    ports:
+      - "9090:9090"
+    extra_hosts:
+      - "node1:172.31.23.157"
+      - "node2:172.31.26.97"
+    volumes:
+      - prometheus_config:/prometheus.yml /etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=90d'
+      - '--storage.tsdb.retention.size=4GB'
+    #restart: unless-stopped
+  grafana:
+    image: grafana/grafana
+    deploy:
+      replicas: 2
+    #container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_config:/grafana.ini /etc/grafana/grafana.ini
+      - grafana_data:/var/lib/grafana
+    #restart: unless-stopped
+    depends_on:
+      - prometheus
+
+volumes:
+  grafana_data:
+  grafana_config:
+  prometheus_data:
+  prometheus_config:
+
